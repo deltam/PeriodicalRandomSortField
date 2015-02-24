@@ -90,7 +90,6 @@ public class PeriodicalRandomSortFieldTest
         String periodStr = "5s,10m,15m"; // no 5s syntax
         List<Integer> periods = PeriodicalRandomSortField.parsePeriodsString(periodStr);
         assertEquals(2, periods.size());
-        System.out.println(periods);
         assertEquals(10*60, (int)periods.get(0));
         assertEquals(15*60, (int)periods.get(1));
     }
@@ -131,19 +130,48 @@ public class PeriodicalRandomSortFieldTest
         int epoc = 1424098800;                          // 2015/02/17 00:00:00
 
         List<Integer> periods = new ArrayList<Integer>();
-        periods.add(1*60*60); // 1時間後
-        periods.add(6*60*60); // 6時間後
+        int period1hour = 1*60*60; // 1時間後
+        int period6hour = 6*60*60; // 6時間後
+        periods.add(period1hour);
+        periods.add(period6hour);
 
-        int firstPeriod         = 1424098860;           // 2015/02/17 00:01:00
+        int firstPeriod       = 1424098860;           // 2015/02/17 00:01:00
+        int firstPeriodEnd    = 1424102399;           // 2015/02/17 00:59:59
+        int secondPeriodStart = firstPeriodEnd + 1;   // 2015/02/17 01:00:00
+        int secondPeriodEnd   = 1424120399;           // 2015/02/17 05:59:59
+        int thirdPeriodStart  = secondPeriodEnd + 1;  // 2015/02/17 05:59:59
+
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriod));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
+        assertEquals(period6hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
+        assertEquals(period6hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodEnd));
+        assertEquals(0,           PeriodicalRandomSortField.getPeriodIndex(epoc, periods, thirdPeriodStart));
+    }
+
+    public void testGetPeriodIndexWhenModified()
+    {
+        int epoc = 1424098800;                          // 2015/02/17 00:00:00
+
+        List<Integer> periods = new ArrayList<Integer>();
+        int period1hour = 1*60*60; // 1時間後
+        periods.add(period1hour);
+
         int firstPeriodEnd      = 1424102399;           // 2015/02/17 00:59:59
         int secondPeriodStart   = firstPeriodEnd + 1;   // 2015/02/17 01:00:00
-        int secondPeriodEnd     = 1424120399;           // 2015/02/17 05:59:59
-        int thirdPeriodStart    = secondPeriodEnd + 1;  // 2015/02/17 05:59:59
 
-        assertEquals(0, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriod));
-        assertEquals(0, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
-        assertEquals(1, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
-        assertEquals(1, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodEnd));
-        assertEquals(2, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, thirdPeriodStart));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
+        assertEquals(0,           PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
+
+
+
+        // あとでPeriodを追加した場合でも既存のPeriodの返り値には影響しない
+        int period30min = 30*60;   // 30分後
+        periods.add(0, period30min);
+        int newPeriodEnd = 1424100600 - 1; // 2015/02/17 00:29:59
+        int firstPeriodStart = newPeriodEnd + 1;
+        assertEquals(period30min, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, newPeriodEnd));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodStart));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
+        assertEquals(0,           PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
     }
 }

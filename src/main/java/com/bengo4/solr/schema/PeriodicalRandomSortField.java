@@ -144,14 +144,12 @@ public class PeriodicalRandomSortField extends FieldType
      */
     protected static int getPeriodIndex(int epoc, List<Integer> periods, int nowTime)
     {
-        int i = 0;
         for (int p: periods) {
-            if (isPeriodNow(epoc, p, nowTime))
-                break;
-            i++;
+            if (isPeriodNow(epoc, p, nowTime)) {
+                return p;
+            }
         }
-
-        return i;
+        return 0;
     }
 
 
