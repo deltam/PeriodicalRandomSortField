@@ -77,19 +77,22 @@ public class PeriodicalRandomSortField extends FieldType
         String[] splitted = fieldName.split(SYNTAX_DELIMIT);
         Map<String,String> params = new HashMap<String,String>();
 
-        if (splitted.length > 1)
+        if (splitted.length > 1) {
             params.put(PARAM_KEY_SEED, splitted[0] + SYNTAX_DELIMIT + splitted[1]);
-        else {
+        } else {
             params.put(PARAM_KEY_SEED, fieldName);
             return params;
         }
 
         // period randomized
-        if (splitted.length > 2)
+        if (splitted.length > 2) {
             params.put(PARAM_KEY_PERIODS, splitted[2]);
+        }
         // epoc
-        if (splitted.length > 3)
+        if (splitted.length > 3) {
             params.put(PARAM_KEY_EPOC, splitted[3]);
+        }
+
         return params;
     }
 
@@ -109,8 +112,9 @@ public class PeriodicalRandomSortField extends FieldType
                 time = Integer.parseInt(period.replaceAll(SYNTAX_PERIOD_MINUTES,""));
                 time *= 60;
             }
-            if (time > 0)
+            if (time > 0) {
                 periodTimes.add(time);
+            }
         }
         return periodTimes;
     }
@@ -128,8 +132,9 @@ public class PeriodicalRandomSortField extends FieldType
      */
     protected static int getDefaultEpoc(Date date)
     {
-        if (date == null)
+        if (date == null) {
             date = new Date();
+        }
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         int y = cal.get(Calendar.YEAR);
@@ -168,10 +173,11 @@ public class PeriodicalRandomSortField extends FieldType
             List<Integer> parsedPeriods = parsePeriodsString(params.get(PARAM_KEY_PERIODS));
             int nowTime = (int)(System.currentTimeMillis() / 1000L);
             int epoc;
-            if (params.containsKey(PARAM_KEY_EPOC))
+            if (params.containsKey(PARAM_KEY_EPOC)) {
                 epoc = Integer.parseInt(params.get(PARAM_KEY_EPOC));
-            else
+            } else {
                 epoc = getDefaultEpoc(null); // today 00:00:00
+            }
 
             periodSeed = getPeriodSeed(epoc, parsedPeriods, nowTime);
         }
@@ -208,38 +214,38 @@ public class PeriodicalRandomSortField extends FieldType
                     int bottomVal;
 
                     @Override
-                        public int compare(int slot1, int slot2) {
+                    public int compare(int slot1, int slot2) {
                         return values[slot1] - values[slot2];  // values will be positive... no overflow possible.
                     }
 
                     @Override
-                        public void setBottom(int slot) {
+                    public void setBottom(int slot) {
                         bottomVal = values[slot];
                     }
 
                     @Override
-                        public int compareBottom(int doc) {
+                    public int compareBottom(int doc) {
                         return bottomVal - hash(doc+seed);
                     }
 
                     @Override
-                        public void copy(int slot, int doc) {
+                    public void copy(int slot, int doc) {
                         values[slot] = hash(doc+seed);
                     }
 
                     @Override
-                        public FieldComparator<Integer> setNextReader(AtomicReaderContext context) { // unchecked警告が出るため返り値に型指定を追加
+                    public FieldComparator<Integer> setNextReader(AtomicReaderContext context) { // unchecked警告が出るため返り値に型指定を追加
                         seed = getSeed(fieldname, context);
                         return this;
                     }
 
                     @Override
-                        public Integer value(int slot) {
+                    public Integer value(int slot) {
                         return values[slot];
                     }
 
                     @Override
-                        public int compareDocToValue(int doc, Integer valueObj) {
+                    public int compareDocToValue(int doc, Integer valueObj) {
                         // values will be positive... no overflow possible.
                         return hash(doc+seed) - valueObj.intValue();
                     }
@@ -252,7 +258,7 @@ public class PeriodicalRandomSortField extends FieldType
         private final String field;
 
         public RandomValueSource(String field) {
-            this.field=field;
+            this.field = field;
         }
 
         @Override
