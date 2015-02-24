@@ -4,9 +4,9 @@
   <groupId>com.bengo4.solr.schema</groupId>
   <artifactId>periodical-random-sort-field</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>PeriodicalRandomSortField</name>
-  <url>http://maven.apache.org</url>
+  <url>https://github.com/deltam/PeriodicalRandomSortField</url>
 
   <!-- ビルドするJDKバージョン -->
   <build>
