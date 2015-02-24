@@ -140,9 +140,10 @@ public class PeriodicalRandomSortField extends FieldType
     }
 
     /**
-     * @return int now period index
+     * Use calc random seed
+     * @return int now period time
      */
-    protected static int getPeriodIndex(int epoc, List<Integer> periods, int nowTime)
+    protected static int getPeriodSeed(int epoc, List<Integer> periods, int nowTime)
     {
         for (int p: periods) {
             if (isPeriodNow(epoc, p, nowTime)) {
@@ -157,7 +158,7 @@ public class PeriodicalRandomSortField extends FieldType
      * field
      */
     private static int getSeed(String fieldName, AtomicReaderContext context) {
-        int periodParam = 0;
+        int periodSeed = 0;
 
         Map<String,String> params = parseField(fieldName);
         String fieldSeed = params.get(PARAM_KEY_SEED);
@@ -172,10 +173,10 @@ public class PeriodicalRandomSortField extends FieldType
             else
                 epoc = getDefaultEpoc(null); // today 00:00:00
 
-            periodParam = getPeriodIndex(epoc, parsedPeriods, nowTime);
+            periodSeed = getPeriodSeed(epoc, parsedPeriods, nowTime);
         }
 
-        return fieldSeed.hashCode() + periodParam;
+        return fieldSeed.hashCode() + periodSeed;
     }
 
 

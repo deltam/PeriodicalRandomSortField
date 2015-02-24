@@ -125,7 +125,7 @@ public class PeriodicalRandomSortFieldTest
         assertFalse(epoc == PeriodicalRandomSortField.getDefaultEpoc(tommorow));
     }
 
-    public void testGetPeriodIndex()
+    public void testGetPeriodSeed()
     {
         int epoc = 1424098800;                          // 2015/02/17 00:00:00
 
@@ -141,14 +141,14 @@ public class PeriodicalRandomSortFieldTest
         int secondPeriodEnd   = 1424120399;           // 2015/02/17 05:59:59
         int thirdPeriodStart  = secondPeriodEnd + 1;  // 2015/02/17 05:59:59
 
-        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriod));
-        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
-        assertEquals(period6hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
-        assertEquals(period6hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodEnd));
-        assertEquals(0,           PeriodicalRandomSortField.getPeriodIndex(epoc, periods, thirdPeriodStart));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, firstPeriod));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, firstPeriodEnd));
+        assertEquals(period6hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, secondPeriodStart));
+        assertEquals(period6hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, secondPeriodEnd));
+        assertEquals(0,           PeriodicalRandomSortField.getPeriodSeed(epoc, periods, thirdPeriodStart));
     }
 
-    public void testGetPeriodIndexWhenModified()
+    public void testGetPeriodSeedWhenModified()
     {
         int epoc = 1424098800;                          // 2015/02/17 00:00:00
 
@@ -159,8 +159,8 @@ public class PeriodicalRandomSortFieldTest
         int firstPeriodEnd      = 1424102399;           // 2015/02/17 00:59:59
         int secondPeriodStart   = firstPeriodEnd + 1;   // 2015/02/17 01:00:00
 
-        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
-        assertEquals(0,           PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, firstPeriodEnd));
+        assertEquals(0,           PeriodicalRandomSortField.getPeriodSeed(epoc, periods, secondPeriodStart));
 
 
 
@@ -169,9 +169,9 @@ public class PeriodicalRandomSortFieldTest
         periods.add(0, period30min);
         int newPeriodEnd = 1424100600 - 1; // 2015/02/17 00:29:59
         int firstPeriodStart = newPeriodEnd + 1;
-        assertEquals(period30min, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, newPeriodEnd));
-        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodStart));
-        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodIndex(epoc, periods, firstPeriodEnd));
-        assertEquals(0,           PeriodicalRandomSortField.getPeriodIndex(epoc, periods, secondPeriodStart));
+        assertEquals(period30min, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, newPeriodEnd));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, firstPeriodStart));
+        assertEquals(period1hour, PeriodicalRandomSortField.getPeriodSeed(epoc, periods, firstPeriodEnd));
+        assertEquals(0,           PeriodicalRandomSortField.getPeriodSeed(epoc, periods, secondPeriodStart));
     }
 }
