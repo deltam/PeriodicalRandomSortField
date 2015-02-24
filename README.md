@@ -1,6 +1,6 @@
 # PeriodicalRandomSortField
 
-* Provides RandomSortField periodically updated.
+* Provides RandomSortField updating periodically on Solr.
 * Unlike RandomSortField, this is does not depend on docBase and index version.
 * Using queryResultCache, sort update time is delay. In that case, added FilterQuery that is alwayes true and include unixtime(Ex: `fq=hoge_i:[* TO {UNIXTIME}]`).
 
@@ -10,7 +10,12 @@
 
 なおqueryResultCacheを使っていると指定した時刻ちょうどにソート順がリセットされない場合があります。その場合はFilterQueryで常に真かつunixtimeを含む条件（`fq=hoge_i:[* TO {UNIXTIME}]`）つけるなどすると回避できます（バッドノウハウですが）。
 
-## INSTALL
+## Require
+* jdk >= 1.6
+* solr >= 4.0.0
+
+
+## Install
 
 load jar file (solrconfig)
 
@@ -40,7 +45,7 @@ vi schema.xml
 ```
 
 
-# Usage
+## Usage
 
 Usage: `prandom_{SEED}[_{PERIODS}[_{EPOC_TIME}]] desc|asc`
 
@@ -50,7 +55,7 @@ Usage: `prandom_{SEED}[_{PERIODS}[_{EPOC_TIME}]] desc|asc`
 
 
 
-# Example
+## Example
 `http://localhost:8983/solr/{YOUR_CORE}/select?q=*:*&prandom_{SEED}_{PERIODS}_{EPOC_TIME}+desc`
 
 
@@ -70,7 +75,7 @@ Usage: `prandom_{SEED}[_{PERIODS}[_{EPOC_TIME}]] desc|asc`
 
 
 
-# License
+## License
 
 Copyright (c) 2015 MISUMI Masaru (deltam@gmail.com).
 
