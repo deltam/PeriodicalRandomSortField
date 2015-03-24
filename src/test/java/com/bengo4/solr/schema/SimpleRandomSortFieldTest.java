@@ -29,8 +29,9 @@ public class SimpleRandomSortFieldTest
         return new TestSuite( SimpleRandomSortFieldTest.class );
     }
 
-    public void testSome()
+    public void testGetSeed()
     {
-        assertEquals(1, 1);
+        String fieldName = "srandom_1234";
+        assertEquals(fieldName.hashCode(), SimpleRandomSortField.getSeed(fieldName, null));
     }
 }

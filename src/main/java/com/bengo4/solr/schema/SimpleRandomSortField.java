@@ -54,7 +54,7 @@ public class SimpleRandomSortField extends FieldType
     /**
      * field
      */
-    private static int getSeed(String fieldName, AtomicReaderContext context) {
+    protected static int getSeed(String fieldName, AtomicReaderContext context) {
         return fieldName.hashCode();
     }
 
