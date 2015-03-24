@@ -134,7 +134,7 @@ public class PeriodicalRandomSortField extends SimpleRandomSortField
     /**
      * field
      */
-    private static int getSeed(String fieldName, AtomicReaderContext context) {
+    protected static int getSeed(String fieldName, AtomicReaderContext context) {
         int periodSeed = 0;
 
         Map<String,String> params = parseField(fieldName);
