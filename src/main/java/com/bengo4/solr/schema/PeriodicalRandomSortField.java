@@ -9,22 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 
-import org.apache.solr.schema.FieldType;
-import org.apache.solr.schema.SchemaField;
-import org.apache.solr.search.QParser;
-import org.apache.solr.response.TextResponseWriter;
-
 import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.ReaderUtil;
-import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.queries.function.FunctionValues;
-import org.apache.lucene.queries.function.ValueSource;
-import org.apache.lucene.queries.function.docvalues.IntDocValues;
-import org.apache.lucene.search.FieldComparator;
-import org.apache.lucene.search.FieldComparatorSource;
-import org.apache.lucene.search.SortField;
-
-import org.apache.solr.common.SolrException;
 
 /**
  * PeriodicalRandomSortField
@@ -45,7 +30,7 @@ import org.apache.solr.common.SolrException;
  *   EPOC_TIME is 2015-02-21 4:00:00, updating after 4 hour and 8 hour, 12 hour.
  *      ...&prandom_SEED_4h,8h,12h_1424458800
  */
-public class PeriodicalRandomSortField extends FieldType
+public class PeriodicalRandomSortField extends SimpleRandomSortField
 {
     protected static final String SYNTAX_DELIMIT        = "_";
     protected static final String SYNTAX_PERIOD_MINUTES = "m";
@@ -55,19 +40,6 @@ public class PeriodicalRandomSortField extends FieldType
     protected static final String PARAM_KEY_SEED    = "seed";
     protected static final String PARAM_KEY_PERIODS = "periods";
     protected static final String PARAM_KEY_EPOC    = "epoc";
-
-    /**
-     * This method is th same as RandomSortField
-     */
-    private static int hash(int key) {
-        key = ~key + (key << 15); // key = (key << 15) - key - 1;
-        key = key ^ (key >>> 12);
-        key = key + (key << 2);
-        key = key ^ (key >>> 4);
-        key = key * 2057; // key = (key + (key << 3)) + (key << 11);
-        key = key ^ (key >>> 16);
-        return key >>> 1;
-    }
 
     /**
      * parse of field name contains parameters
@@ -162,7 +134,7 @@ public class PeriodicalRandomSortField extends FieldType
     /**
      * field
      */
-    private static int getSeed(String fieldName, AtomicReaderContext context) {
+    protected static int getSeed(String fieldName, AtomicReaderContext context) {
         int periodSeed = 0;
 
         Map<String,String> params = parseField(fieldName);
@@ -183,110 +155,5 @@ public class PeriodicalRandomSortField extends FieldType
         }
 
         return fieldSeed.hashCode() + periodSeed;
-    }
-
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    /* under code is the same as RandomSortField */
-
-    @Override
-    public SortField getSortField(SchemaField field, boolean reverse) {
-        return new SortField(field.getName(), randomComparatorSource, reverse);
-    }
-
-    @Override
-    public ValueSource getValueSource(SchemaField field, QParser qparser) {
-        return new RandomValueSource(field.getName());
-    }
-
-    @Override
-    public void write(TextResponseWriter writer, String name, IndexableField f) throws IOException { }
-
-
-
-    private static FieldComparatorSource randomComparatorSource = new FieldComparatorSource() {
-            @Override
-            public FieldComparator<Integer> newComparator(final String fieldname, final int numHits, int sortPos, boolean reversed) {
-                return new FieldComparator<Integer>() {
-                    int seed;
-                    private final int[] values = new int[numHits];
-                    int bottomVal;
-
-                    @Override
-                    public int compare(int slot1, int slot2) {
-                        return values[slot1] - values[slot2];  // values will be positive... no overflow possible.
-                    }
-
-                    @Override
-                    public void setBottom(int slot) {
-                        bottomVal = values[slot];
-                    }
-
-                    @Override
-                    public int compareBottom(int doc) {
-                        return bottomVal - hash(doc+seed);
-                    }
-
-                    @Override
-                    public void copy(int slot, int doc) {
-                        values[slot] = hash(doc+seed);
-                    }
-
-                    @Override
-                    public FieldComparator<Integer> setNextReader(AtomicReaderContext context) { // unchecked警告が出るため返り値に型指定を追加
-                        seed = getSeed(fieldname, context);
-                        return this;
-                    }
-
-                    @Override
-                    public Integer value(int slot) {
-                        return values[slot];
-                    }
-
-                    @Override
-                    public int compareDocToValue(int doc, Integer valueObj) {
-                        // values will be positive... no overflow possible.
-                        return hash(doc+seed) - valueObj.intValue();
-                    }
-                };
-            }
-        };
-
-
-    public class RandomValueSource extends ValueSource {
-        private final String field;
-
-        public RandomValueSource(String field) {
-            this.field = field;
-        }
-
-        @Override
-        public String description() {
-            return field;
-        }
-
-        @Override
-        public FunctionValues getValues(Map context, final AtomicReaderContext readerContext) throws IOException {
-            return new IntDocValues(this) {
-                private final int seed = getSeed(field, readerContext);
-                @Override
-                public int intVal(int doc) {
-                    return hash(doc+seed);
-                }
-            };
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof RandomValueSource)) return false;
-            RandomValueSource other = (RandomValueSource)o;
-            return this.field.equals(other.field);
-        }
-
-        @Override
-        public int hashCode() {
-            return field.hashCode();
-        };
     }
 }
